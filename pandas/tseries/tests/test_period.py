@@ -330,8 +330,6 @@ class TestPeriodProperties(tm.TestCase):
         result = p.to_timestamp('S', how='start')
         self.assertEqual(result, expected)
 
-        assertRaisesRegexp(ValueError, 'Only mult == 1',  p.to_timestamp, '5t')
-
         p = Period('NaT', freq='W')
         self.assertTrue(p.to_timestamp() is tslib.NaT)
 
@@ -2148,35 +2146,38 @@ class TestPeriodIndex(tm.TestCase):
             prng = rng.to_period()
             self.assertEqual(prng.freq, 'M')
 
-    def test_no_multiples(self):
-        self.assertRaises(ValueError, period_range, '1989Q3', periods=10,
-                          freq='2Q')
+    # should we nuke these after multiples are implemented?
+    #def test_no_multiples(self):
+    #    self.assertRaises(ValueError, period_range, '1989Q3', periods=10,
+    #                      freq='2Q')
 
-        self.assertRaises(ValueError, period_range, '1989', periods=10,
-                          freq='2A')
-        self.assertRaises(ValueError, Period, '1989', freq='2A')
+    #    self.assertRaises(ValueError, period_range, '1989', periods=10,
+    #                      freq='2A')
+    #    self.assertRaises(ValueError, Period, '1989', freq='2A')
 
-    # def test_pindex_multiples(self):
-    #     pi = PeriodIndex(start='1/1/10', end='12/31/12', freq='2M')
-    #     self.assertEqual(pi[0], Period('1/1/10', '2M'))
-    #     self.assertEqual(pi[1], Period('3/1/10', '2M'))
+    def test_pindex_multiples(self):
+        pi = PeriodIndex(start='1/1/10', end='12/31/12', freq='2M')
+        self.assertEqual(pi[0], Period('1/1/10', '2M'))
+        self.assertEqual(pi[1], Period('3/1/10', '2M'))
 
-    #     self.assertEqual(pi[0].asfreq('6M'), pi[2].asfreq('6M'))
-    #     self.assertEqual(pi[0].asfreq('A'), pi[2].asfreq('A'))
+        # not sure if this is the expected behavior
+        #self.assertEqual(pi[0].asfreq('6M'), pi[2].asfreq('6M'))
+        self.assertEqual(pi[0].asfreq('A'), pi[2].asfreq('A'))
 
-    #     self.assertEqual(pi[0].asfreq('M', how='S'),
-    #                       Period('Jan 2010', '1M'))
-    #     self.assertEqual(pi[0].asfreq('M', how='E'),
-    #                       Period('Feb 2010', '1M'))
-    #     self.assertEqual(pi[1].asfreq('M', how='S'),
-    #                       Period('Mar 2010', '1M'))
+        self.assertEqual(pi[0].asfreq('M', how='S'),
+                          Period('Jan 2010', '1M'))
+        self.assertEqual(pi[0].asfreq('M', how='E'),
+                          Period('Feb 2010', '1M'))
+        self.assertEqual(pi[1].asfreq('M', how='S'),
+                          Period('Mar 2010', '1M'))
 
-    #     i = Period('1/1/2010 12:05:18', '5S')
-    #     self.assertEqual(i, Period('1/1/2010 12:05:15', '5S'))
+        # this may be the same behavior as above
+        #i = Period('1/1/2010 12:05:18', '5S')
+        #self.assertEqual(i, Period('1/1/2010 12:05:15', '5S'))
 
-    #     i = Period('1/1/2010 12:05:18', '5S')
-    #     self.assertEqual(i.asfreq('1S', how='E'),
-    #                       Period('1/1/2010 12:05:19', '1S'))
+        i = Period('1/1/2010 12:05:18', '5S')
+        self.assertEqual(i.asfreq('1S', how='E'),
+                          Period('1/1/2010 12:05:19', '1S'))
 
     def test_iteration(self):
         index = PeriodIndex(start='1/1/10', periods=4, freq='B')

@@ -851,7 +851,8 @@ def _get_ordinal_range(start, end, periods, freq):
             data = np.arange(start.ordinal, start.ordinal + periods,
                              dtype=np.int64)
     else:
-        data = np.arange(start.ordinal, end.ordinal + 1, dtype=np.int64)
+        _, mult = _gfc(freq)
+        data = np.arange(start.ordinal, end.ordinal + 1, mult, dtype=np.int64)
 
     return data, freq
 

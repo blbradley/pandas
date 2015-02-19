@@ -716,9 +716,6 @@ cdef class Period(object):
             raise ValueError(msg)
 
         base, mult = _gfc(freq)
-        if mult != 1:
-            # TODO: Better error message - this is slightly confusing
-            raise ValueError('Only mult == 1 supported')
 
         if ordinal is None:
             self.ordinal = get_period_ordinal(dt.year, dt.month, dt.day,
@@ -727,7 +724,7 @@ cdef class Period(object):
         else:
             self.ordinal = ordinal
 
-        self.freq = frequencies._get_freq_str(base)
+        self.freq = frequencies._get_freq_str(base, mult)
 
     def __richcmp__(self, other, op):
         if isinstance(other, Period):
@@ -936,13 +933,11 @@ cdef class Period(object):
         return self.__unicode__()
 
     def __repr__(self):
-        from pandas.tseries import frequencies
         from pandas.tseries.frequencies import get_freq_code as _gfc
         base, mult = _gfc(self.freq)
         formatted = period_format(self.ordinal, base)
-        freqstr = frequencies._reverse_period_code_map[base]
 
-        return "Period('%s', '%s')" % (formatted, freqstr)
+        return "Period('%s', '%s')" % (formatted, self.freq)
 
     def __unicode__(self):
         """
